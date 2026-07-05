@@ -7,7 +7,7 @@ const register = async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
 
-        const user = await User.find({ email });
+        const user = await User.findOne({ email });
 
         if(user) {
             throw new AppError('Email already registered', 400);
@@ -22,9 +22,9 @@ const register = async (req, res, next) => {
         return res.status(201).json({
             message: 'User registered successfully',
             user: {
-                id: user._id,
-                name: user.name,
-                email: user.email
+                id: newUser._id,
+                name: newUser.name,
+                email: newUser.email
             }
         });
     }
@@ -37,13 +37,13 @@ const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.find({ email });
+        const user = await User.findOne({ email });
 
         if(!user) {
             throw new AppError('Invalid email or password', 400);
         }
 
-        const isMatched = await bcrypt.compare(password, hashedPassword);
+        const isMatched = await bcrypt.compare(password, user.password);
         if(!isMatched) {
             throw new AppError('Invalid email or password', 400);
         }
