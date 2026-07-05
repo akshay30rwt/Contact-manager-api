@@ -20,7 +20,7 @@ const addContact = async (req, res, next) => {
 
 const getMyContacts = async (req, res, next) => {
     try {
-        const contacts = await Contact.find({ user: req.user.userId});
+        const contacts = await Contact.find({ user: req.user.userId}).populate('user', 'name email');
 
         if(contacts.length === 0) {
             return res.status(404).json({
