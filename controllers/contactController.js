@@ -20,7 +20,7 @@ const addContact = async (req, res, next) => {
 
 const getMyContacts = async (req, res, next) => {
     try {
-        contacts = await Contact.find({ user: req.user.userId}).populate('user', 'name email');
+        const contacts = await Contact.find({ user: req.user.userId});
 
         if(contacts.length === 0) {
             return res.status(404).json({
@@ -38,7 +38,10 @@ const getMyContacts = async (req, res, next) => {
 const getContactById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const contact = await Contact.findById(id).populate('user', 'name email');
+        const contact = await Contact.findOne({
+            _id: id,
+            user: req.user.userId
+        }).populate('user', 'name email');
 
         if(!contact) {
             throw new AppError(`Contact with ID: ${id} not found`, 404);
@@ -56,7 +59,7 @@ const updateContact = async (req, res, next) => {
         const { id } = req.params;
         const { name, phone, email, category } = req.body;
 
-        const updatedContact = await Contact.findByIdAndUpdate(id, { name, phone, email, category }, { new: true, runValidators: true }).populate('user', 'name email');
+        const updatedContact = await Contact.findOneAndUpdate({_id: id, user: req.user.userId}, { name, phone, email, category }, { new: true, runValidators: true }).populate('user', 'name email');
 
         if(!updatedContact) {
             throw new AppError(`Contact with ID: ${id} not found`, 404);
@@ -76,7 +79,7 @@ const deleteContact = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const deletedContact = await Contact.findByIdAndDelete(id).populate('user', 'name email');
+        const deletedContact = await Contact.findOneAndDelete({_id: id, user: req.user.userId}).populate('user', 'name email');
 
         if(!deletedContact) {
             throw new AppError(`Contact with ID: ${id} not found`, 404);
