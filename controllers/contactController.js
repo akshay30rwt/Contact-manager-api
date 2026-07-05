@@ -50,3 +50,46 @@ const getContactById = async (req, res, next) => {
         next(error);
     }
 }
+
+const updateContact = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { name, phone, email, category } = req.body;
+
+        const updatedContact = await Contact.findByIdAndUpdate(id, { name, phone, email, category }, { new: true, runValidators: true }).populate('user', 'name email');
+
+        if(!updatedContact) {
+            throw new AppError(`Contact with ID: ${id} not found`, 404);
+        }
+
+        return res.status(200).json({
+            message: 'Contact updated successfully',
+            updatedContact
+        });
+    }
+    catch(error) {
+        next(error);
+    }
+}
+
+const deleteContact = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const deletedContact = await Contact.findByIdAndDelete(id).populate('user', 'name email');
+
+        if(!deletedContact) {
+            throw new AppError(`Contact with ID: ${id} not found`, 404);
+        }
+
+        return res.status(200).json({
+            message: 'Contact deleted successfully',
+            deletedContact
+        });
+    }
+    catch(error) {
+        next(error);
+    }
+}
+
+module.exports = { addContact, getMyContacts, getContactById, updateContact, deleteContact };
